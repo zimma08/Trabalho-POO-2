@@ -1,0 +1,65 @@
+import java.io.FileWriter;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
+public class LoggerFactory {
+    public static Logger onConsole() {
+        return new LoggerConsole();
+    }
+
+    public static Logger onFile() {
+        return new LoggerFile();
+    }
+}
+
+interface Logger {
+    void log(Level level, String message);
+}
+
+class LoggerConsole implements Logger {
+    public void log(Level level, String message) {
+        String colorCode = "";
+        switch (level) {
+            case DEBUG:
+                colorCode = "\u001B[32m"; // Verde
+                break;
+            case WARNING:
+                colorCode = "\u001B[33m"; // Amarelo
+                break;
+            case ERROR:
+                colorCode = "\u001B[31m"; // Vermelho
+                break;
+        }
+        System.out.print(colorCode + message + "\u001B[0m"); // Reset color
+        System.out.println(); // Adiciona uma quebra de linha
+    }
+}
+
+class LoggerFile implements Logger {
+    private FileWriter fileWriter;
+
+    public LoggerFile() {
+        try {
+            fileWriter = new FileWriter("log.txt", true); // true para append
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void log(Level level, String message) {
+        try {
+            String currentTime = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date());
+            fileWriter.write(currentTime + " - " + level + " - " + message + "\n");
+            fileWriter.flush();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+}
+
+enum Level {
+    DEBUG,
+    WARNING,
+    ERROR
+}
